@@ -2,6 +2,26 @@
 const express = require('express');
 const User = require('./users/model')
 const server = express();
+server.use(express.json())
+
+server.post('/api/users', (req, res) => {
+    const user = req.body;
+    if (!user.name || !user.bio) {
+        res.status(400).json({
+            message: "Please provide name and bio for the user"
+        })
+        } else {
+            User.insert(user)
+            .then(newUser => {
+                res.status(201).json(newUser)
+            })
+            .catch(err => {
+                res.status(500).json({ 
+                    message: "There was an error while saving the user to the database" 
+                })
+            })
+        }
+})
 
 server.get('/api/users/:id', (req, res)=> {
     User.findById(req.params.id)
@@ -15,7 +35,7 @@ server.get('/api/users/:id', (req, res)=> {
         })
         .catch(err => {
             res.status(500).json({ 
-                message: "unable to find user",
+                message: "error getting user",
                 err: err.message
             })
         })
@@ -28,9 +48,7 @@ server.get('/api/users', (req, res)=> {
         })
         .catch(err => {
             res.status(500).json({
-                message: 'The users information could not be retrieved',
-                err: err.message,
-                stack: err.stack
+                message: "The users information could not be retrieved"
             })
         })
 })
